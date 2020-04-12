@@ -1,18 +1,17 @@
+import importlib
 import re
 import requests
 import uuid
 from bs4 import BeautifulSoup
 
-class Bank:
+api = importlib.import_module('api')
+
+class BankApi(api.Api):
     def __init__(self):
+        super().__init__('https://online.mbank.pl')
         self.__tab_id = None
         self.__token = None
-        self.__base_url = 'https://online.mbank.pl'
-        self.__session = requests.Session()
         self.__jar = requests.cookies.RequestsCookieJar()
-    
-    def format_url(self, url):
-        return '{}{}'.format(self.__base_url, url)
     
     def prepare_request(self, method, url):
         headers = {
@@ -32,8 +31,8 @@ class Bank:
         return [c.split('=', 1) for c in cookies if 'mBank' in c]
     
     def send_request(self, request):
-        res = self.__session.send(request.prepare())
-        self.__debug(res)
+        res = self.session.send(request.prepare())
+        # self.debug(res)
         if ('Set-Cookie' in res.headers):
             for c in self.parse_cookies(res.headers['Set-Cookie']):
                 self.__jar.set(c[0], c[1])
@@ -46,7 +45,7 @@ class Bank:
         if ('cookie' in settings):
             self.__jar.set('mBank8', settings['cookie'])
 
-        res = self.__session.get(self.format_url('/pl'))
+        res = self.session.get(self.format_url('/pl'))
         match = re.search(r'app.initialize\(\'([\w=-]+)\'', res.text)
         if (match is None):
             raise Exception('Seed not found.')
@@ -137,17 +136,10 @@ class Bank:
 
         return self.__jar.get('mBank8')
 
-    def __debug(self, response):
-        request = response.request
-        print('{} {}'.format(request.method, request.url))
-        print('  headers: {}'.format(request.headers))
-        print('  body: {}'.format(request.body))
-        print('{} {}'.format(response.status_code, response.reason))
-        print('  headers: {}'.format(response.headers))
-        if ('Content-Type' in response.headers and 'json' in response.headers['Content-Type']):
-            print('  body: {}'.format(response.text))
-
-
-# <meta 
-# content="shEvEb8MVFMjvIgRCMb2IdjYv7ju2gdb4N9ubsXQfAXk63x42gNFBVBSvk92Xp7QKaKh64EVbADUJREdCh6pDjh1bPdb8At1aSaN4sL6HCTcyN5hJRaP34S2Zh0z/JWy4VmJQzeLqxeQEexq93yV9ooT51u0PisvHF5j41YIGSZP489X" 
-# name="__AjaxRequestVerificationToken">
+    def get_accounts(self, settings):
+        if (self.__tab_id is None or self.__token is None):
+            self.login(settings)
+        
+        req = self.prepare_request('GET', '/pl/Pfm/HistoryApi/GetPfmInitialData')
+        res = self.send_request(req)
+        return res['pfmProducts']

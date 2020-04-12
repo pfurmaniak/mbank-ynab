@@ -7,4 +7,4 @@ with open('settings.json') as f:
     bank_module = importlib.import_module('bank')
     bank = bank_module.Bank()
 
-    bank.login(settings)
+    bank.get_accounts(settings)
