@@ -1,6 +1,7 @@
 import re
 import requests
 import uuid
+from bs4 import BeautifulSoup
 
 class Bank:
     def __init__(self):
@@ -73,7 +74,9 @@ class Bank:
 
         req = self.prepare_request('GET', '/pl')
         res = self.send_request(req)
-        print(res)
+        soup = BeautifulSoup(res, features="html.parser")
+        tag = soup.head.find('meta', attrs={ 'name': '__AjaxRequestVerificationToken' })
+        self.__token = tag['content']
     
     def authorize(self, settings):
         self.__login(settings)
