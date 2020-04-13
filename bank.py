@@ -1,3 +1,4 @@
+import datetime
 import importlib
 import re
 import requests
@@ -143,3 +144,21 @@ class BankApi(api.Api):
         req = self.prepare_request('GET', '/pl/Pfm/HistoryApi/GetPfmInitialData')
         res = self.send_request(req)
         return res['pfmProducts']
+
+    def get_transactions(self, settings):
+        if (self.__tab_id is None or self.__token is None):
+            self.login(settings)
+        
+        accounts = [a for a in settings['accounts'] if a['ynab_id'] != '']
+
+        dateTo = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        dateFrom = dateTo - datetime.timedelta(days=2)
+        
+        req = self.prepare_request('GET', '/pl/Pfm/HistoryApi/GetOperationsPfm')
+        req.params = {
+            'productIds': ','.join([a['id'] for a in accounts]),
+            'dateFrom': dateFrom.isoformat(),
+            'dateTo': dateTo.isoformat()
+        }
+        res = self.send_request(req)
+        return res['transactions']
