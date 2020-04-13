@@ -29,12 +29,12 @@ with open('settings.json', 'r+', encoding='utf-8') as f:
     print('Accounts in bank:')
     accounts = bank.get_accounts(settings['bank'])
     for a in accounts:
-        ynab_id = input('Map {} to YNAB account: '.format(a['name']))
+        ynab_id = input('Map {} ({}) to YNAB account: '.format(a['name'], a['contractNumber']))
         if (ynab_id == ''):
             a['ynab_id'] = ''
         else:
             a['ynab_id'] = ynab_accounts[int(ynab_id) - 1]['id']
-    settings['bank']['accounts'] = [{ 'id': a['id'], 'name': a['name'], 'alias': a['contractAlias'], 'ynab_id': a['ynab_id'] } for a in accounts]
+    settings['bank']['accounts'] = [{ 'id': a['id'], 'name': a['name'], 'number': a['contractNumber'], 'ynab_id': a['ynab_id'] } for a in accounts]
 
     f.truncate(0)
     json.dump(settings, f, ensure_ascii=False, indent=4)

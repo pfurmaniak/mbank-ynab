@@ -145,14 +145,14 @@ class BankApi(api.Api):
         res = self.send_request(req)
         return res['pfmProducts']
 
-    def get_transactions(self, settings):
+    def get_transactions(self, settings, days=2):
         if (self.__tab_id is None or self.__token is None):
             self.login(settings)
         
         accounts = [a for a in settings['accounts'] if a['ynab_id'] != '']
 
         dateTo = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        dateFrom = dateTo - datetime.timedelta(days=2)
+        dateFrom = dateTo - datetime.timedelta(days=days)
         
         req = self.prepare_request('GET', '/pl/Pfm/HistoryApi/GetOperationsPfm')
         req.params = {

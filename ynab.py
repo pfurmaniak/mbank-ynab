@@ -33,3 +33,22 @@ class YnabApi(api.Api):
         req = self.prepare_request('GET', '/budgets/{}/accounts'.format(budget_id))
         res = self.send_request(req)
         return res['data']['accounts']
+
+    # {
+    #     "transactions": [{
+    #         "account_id": "9866394d-a21e-420a-a6eb-18009f713c32",
+    #         "date": "2020-04-11",
+    #         "amount": -29600,
+    #         "payee_name": "ZABKA Z0782 K.1",
+    #         "cleared": "cleared",
+    #         "approved": false,
+    #         "import_id": "mBank:2478753991"
+    #     },(...)]
+    # }
+    def post_transactions(self, budget_id, transactions):
+        req = self.prepare_request('POST', '/budgets/{}/transactions'.format(budget_id))
+        req.json = {
+            'transactions': transactions
+        }
+        res = self.send_request(req)
+        return res['data']
