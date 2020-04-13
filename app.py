@@ -1,7 +1,7 @@
 import importlib
 import json
 
-with open('settings.json') as f:
+with open('settings.json', encoding='utf-8') as f:
     settings = json.load(f)
 
     bank_module = importlib.import_module('bank')

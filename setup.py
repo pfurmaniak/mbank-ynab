@@ -13,5 +13,5 @@ bank_module = importlib.import_module('bank')
 bank = bank_module.Bank()
 settings['cookie'] = bank.authorize(settings)
 
-with open('settings.json', 'w') as f:
+with open('settings.json', 'w', encoding='utf-8') as f:
     json.dump(settings, f, ensure_ascii=False, indent=4)

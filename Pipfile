@@ -13,3 +13,7 @@ beautifulsoup4 = "*"
 
 [requires]
 python_version = "3.7"
+
+[scripts]
+scrape = "python app.py"
+setup = "python setup.py && python setup_accounts.py"
