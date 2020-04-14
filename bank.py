@@ -15,6 +15,7 @@ class BankApi(api.Api):
         self.__token = None
         self.__jar = requests.cookies.RequestsCookieJar()
         self.__settings = settings
+        self.__profile = None
         if ('cookie' in settings):
             self.__jar.set('mBank8', settings['cookie'])
     
@@ -137,6 +138,20 @@ class BankApi(api.Api):
         res = self.send_request(req)
 
         return self.__jar.get('mBank8')
+    
+    # 'I' - Personal profile
+    # 'B' - Business profile
+    def switch_profile(self, profileCode):
+        if (self.__profile == profileCode):
+            return
+
+        req = self.prepare_request('POST', '/pl/LoginMain/Account/JsonActivateProfile')
+        req.params = {
+            'profileCode': profileCode
+        }
+        res = self.send_request(req)
+        self.__profile = profileCode
+        return res
 
     def get_accounts(self):
         if (self.__tab_id is None or self.__token is None):
