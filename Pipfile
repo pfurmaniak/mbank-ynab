@@ -10,6 +10,7 @@ rope = "*"
 [packages]
 requests = "*"
 beautifulsoup4 = "*"
+apscheduler = "*"
 
 [requires]
 python_version = "3.7"
