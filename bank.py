@@ -1,18 +1,22 @@
+from bs4 import BeautifulSoup
 import datetime
 import importlib
 import re
 import requests
 import uuid
-from bs4 import BeautifulSoup
 
 api = importlib.import_module('api')
 
+# TODO: Add a method to switch between available profiles
 class BankApi(api.Api):
-    def __init__(self):
+    def __init__(self, settings):
         super().__init__('https://online.mbank.pl')
         self.__tab_id = None
         self.__token = None
         self.__jar = requests.cookies.RequestsCookieJar()
+        self.__settings = settings
+        if ('cookie' in settings):
+            self.__jar.set('mBank8', settings['cookie'])
     
     def prepare_request(self, method, url):
         headers = {
@@ -42,10 +46,7 @@ class BankApi(api.Api):
         except:
             return res.text
     
-    def __login(self, settings):
-        if ('cookie' in settings):
-            self.__jar.set('mBank8', settings['cookie'])
-
+    def __login(self):
         res = self.session.get(self.format_url('/pl'))
         match = re.search(r'app.initialize\(\'([\w=-]+)\'', res.text)
         if (match is None):
@@ -54,13 +55,13 @@ class BankApi(api.Api):
 
         req = self.prepare_request('POST', '/pl/LoginMain/Account/JsonLogin')
         req.json = {
-            'Username': settings['username'],
-            'Password': settings['password'],
+            'Username': self.__settings['username'],
+            'Password': self.__settings['password'],
             'Scenario': 'Default',
             'Seed': seed,
             'Lang': '',
             'DfpData': {
-                'Dfp': settings['dfp'],
+                'Dfp': self.__settings['dfp'],
                 'ScaOperationId': str(uuid.uuid4())
             }
         }
@@ -69,8 +70,8 @@ class BankApi(api.Api):
             raise Exception('Login failed.')
         self.__tab_id = res['tabId']
     
-    def login(self, settings):
-        self.__login(settings)
+    def login(self):
+        self.__login()
 
         req = self.prepare_request('GET', '/pl')
         res = self.send_request(req)
@@ -78,8 +79,8 @@ class BankApi(api.Api):
         tag = soup.head.find('meta', attrs={ 'name': '__AjaxRequestVerificationToken' })
         self.__token = tag['content']
     
-    def authorize(self, settings):
-        self.__login(settings)
+    def authorize(self):
+        self.__login()
         
         req = self.prepare_request('GET', '/authorization')
         self.send_request(req)
@@ -103,7 +104,7 @@ class BankApi(api.Api):
             'Method': 'POST',
             'Data': {
                 'ScaAuthorizationId': sca_authorization_id,
-                'DfpData': settings['dfp'],
+                'DfpData': self.__settings['dfp'],
                 'DeviceName': device_name,
                 'IsTheOnlyDeviceUser': True
             }
@@ -130,26 +131,26 @@ class BankApi(api.Api):
         req = self.prepare_request('POST', '/pl/Sca/FinalizeTrustedDeviceAuthorization')
         req.json = {
             'ScaAuthorizationId': sca_authorization_id,
-            'CurrentDfp': settings['dfp'],
+            'CurrentDfp': self.__settings['dfp'],
             'DeviceName': device_name
         }
         res = self.send_request(req)
 
         return self.__jar.get('mBank8')
 
-    def get_accounts(self, settings):
+    def get_accounts(self):
         if (self.__tab_id is None or self.__token is None):
-            self.login(settings)
+            self.login()
         
         req = self.prepare_request('GET', '/pl/Pfm/HistoryApi/GetPfmInitialData')
         res = self.send_request(req)
         return res['pfmProducts']
 
-    def get_transactions(self, settings, days=2):
+    def get_transactions(self, accounts, days=2):
         if (self.__tab_id is None or self.__token is None):
-            self.login(settings)
+            self.login()
         
-        accounts = [a for a in settings['accounts'] if a['ynab_id'] != '']
+        accounts = [a for a in accounts if a['ynab_id'] != '']
 
         dateTo = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         dateFrom = dateTo - datetime.timedelta(days=days)

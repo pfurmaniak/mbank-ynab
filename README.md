@@ -1,12 +1,16 @@
-# Installation
-1. Install pipenv
-2. Run the following command from project root
+# mBank - YNAB integration
+This app allows you to keep your mBank transactions in sync with YNAB. Written in python, deployable for free on Heroku.
+
+1. Clone the repository
 ```
+git clone https://github.com/pfurmaniak/mbank-ynab
+```
+2. Install pipenv and the dependencies
+```
+pip install pipenv --user
 pipenv install
-pipenv run setup
 ```
-3. Setup will take you through the configuration process
-4. Run the following command to post latest transactions to YNAB
+3. Run the setup script and follow instructions on the screen
 ```
-pipenv run scrape
+pipenv start setup
 ```
