@@ -80,7 +80,7 @@ class BankApi(api.Api):
         tag = soup.head.find('meta', attrs={ 'name': '__AjaxRequestVerificationToken' })
         self.__token = tag['content']
     
-    def authorize(self):
+    def authorize(self, device_name):
         self.__login()
         
         req = self.prepare_request('GET', '/authorization')
@@ -97,7 +97,6 @@ class BankApi(api.Api):
             raise Exception('Cannot add a new trusted device.')
 
         sca_authorization_id = res['ScaAuthorizationId']
-        device_name = str(uuid.uuid4())[:8]
 
         req = self.prepare_request('POST', '/api/auth/initprepare')
         req.json = {

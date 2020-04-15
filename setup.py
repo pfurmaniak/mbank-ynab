@@ -1,5 +1,6 @@
 import importlib
 import json
+import uuid
 
 settings = {}
 settings['username'] = input('Username: ')
@@ -8,10 +9,11 @@ print('In order to get the next required value, open your browser in incognito m
 print('enter Developer Tools (F12), go to Console and execute the following command:')
 print('  Ebre.Behaviour.GetCurrentDfp()._rejectionHandler0')
 settings['dfp'] = input('DfpData: ')
+device_name = input('Device name (leave empty to randomize): ') or str(uuid.uuid4())[:8]
 
 bank_module = importlib.import_module('bank')
-bank = bank_module.Bank(settings)
-# settings['cookie'] = bank.authorize(settings)
+bank = bank_module.BankApi(settings)
+settings['cookie'] = bank.authorize(device_name)
 
 ynab_token = input('YNAB token: ')
 ynab_module = importlib.import_module('ynab')
