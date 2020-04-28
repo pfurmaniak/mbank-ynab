@@ -173,7 +173,9 @@ class BankApi(api.Api):
         req.params = {
             'productIds': ','.join([a['id'] for a in accounts]),
             'dateFrom': dateFrom.isoformat(),
-            'dateTo': dateTo.isoformat()
+            'dateTo': dateTo.isoformat(),
+            'showIrrelevantTransactions': True,
+            'showSavingsAndInvestments': True
         }
         res = self.send_request(req)
         return res['transactions']

@@ -10,7 +10,8 @@ git clone https://github.com/pfurmaniak/mbank-ynab
 pip install pipenv --user
 pipenv install
 ```
-3. Run the setup script and follow instructions on the screen
+3. Run the setup script and follow instructions on the screen. This stage will setup your local environmental variables 
 ```
 pipenv start setup
 ```
+4. 
