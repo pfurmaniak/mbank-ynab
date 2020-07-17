@@ -27,7 +27,7 @@ def run():
         'account_id': accounts[t['accountNumber']],
         'date': t['transactionDate'][:10],
         'amount': int(float(t['amount']) * 1000),
-        'payee_name': t['description'],
+        'payee_name': t['description'][:100] if len(t['description']) > 100 else t['description'],
         'cleared': 'cleared',
         'approved': False,
         'import_id': 'mBank:{}'.format(t['pfmId'])
