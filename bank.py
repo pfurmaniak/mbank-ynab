@@ -67,6 +67,8 @@ class BankApi(api.Api):
             }
         }
         res = self.send_request(req)
+        if (res['redirectUrl'] == '/authorization'):
+            raise Exception('Authorization necessary. Please go throuh the setup process again.')
         if (res['successful'] == 'false'):
             raise Exception('Login failed.')
         self.__tab_id = res['tabId']
